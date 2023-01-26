@@ -3,10 +3,10 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["ServerlessContainerDemo/ServerlessContainerDemo.csproj", "ServerlessContainerDemo/"]
-RUN dotnet restore "ServerlessContainerDemo/ServerlessContainerDemo.csproj"
+COPY ["ServerlessContainerDemo.csproj", "./"]
+RUN dotnet restore "ServerlessContainerDemo.csproj"
 COPY . .
-WORKDIR "/src/ServerlessContainerDemo"
+WORKDIR "/src"
 RUN dotnet build "ServerlessContainerDemo.csproj" -c Release -o /app/build
 
 FROM build AS publish
