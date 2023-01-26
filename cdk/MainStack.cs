@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Constructs;
 using external.DataExternal;
 using external.Provider;
@@ -18,13 +19,22 @@ namespace MyTerraformStack
     {
         public MainStack(Construct scope, string id) : base(scope, id)
         {
-            var folderId = Environment.GetEnvironmentVariable("FOLDER_ID");
+            var folderId = new TerraformVariable(this, "folderId", new TerraformVariableConfig()
+            {
+                Type = "string",
+                Description = "Folder where to deploy the container."
+            });
+            var token = new TerraformVariable(this, "token", new TerraformVariableConfig()
+            {
+                Type = "string",
+                Description = "IAM Token to deploy the stack",
+            });
             new NullProvider(this, "null", new NullProviderConfig());
             new ExternalProvider(this, "ext", new ExternalProviderConfig());
             new YandexProvider(this, "yandex", new YandexProviderConfig
             {
-                FolderId = folderId,
-                Token = Environment.GetEnvironmentVariable("IAM_TOKEN"),
+                FolderId = folderId.StringValue,
+                Token = token.StringValue,
             });
 
             var containerSA = new IamServiceAccount(this, "container-sa", new IamServiceAccountConfig()
@@ -34,7 +44,7 @@ namespace MyTerraformStack
 
             new ResourcemanagerFolderIamMember(this, "containerImagePuller", new ResourcemanagerFolderIamMemberConfig
             {
-                FolderId = folderId,
+                FolderId = folderId.StringValue,
                 Member = $"serviceAccount:{containerSA.Id}",
                 Role = "container-registry.images.puller",
                 SleepAfter = 10,
@@ -78,10 +88,14 @@ namespace MyTerraformStack
                         Type = "local-exec",
                         WorkingDir = sourceCodeAsset.Path
                     }
+                },
+                Triggers = new Dictionary<string, string>()
+                {
+                    ["gitSHA"] = gitSha.Result.Lookup("sha"),
                 }
             });
 
-            new ServerlessContainer(this, "container", new ServerlessContainerConfig
+            var container = new ServerlessContainer(this, "container", new ServerlessContainerConfig
             {
                 Image = new ServerlessContainerImage
                 {
@@ -93,6 +107,11 @@ namespace MyTerraformStack
                 Name = "serverless-dotnet",
                 ServiceAccountId = containerSA.Id,
                 DependsOn = new[] {image}
+            });
+
+            new TerraformOutput(this, "container-url", new TerraformOutputConfig()
+            {
+                Value = container.Url,
             });
         }
     }
