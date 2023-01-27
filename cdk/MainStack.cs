@@ -6,6 +6,7 @@ using external.Provider;
 using HashiCorp.Cdktf;
 using Providers.Null.Provider;
 using Providers.Null.Resource;
+using yandex.ApiGateway;
 using yandex.ContainerRegistry;
 using yandex.IamServiceAccount;
 using yandex.Provider;
@@ -37,7 +38,7 @@ namespace MyTerraformStack
                 Token = token.StringValue,
             });
 
-            var containerSA = new IamServiceAccount(this, "container-sa", new IamServiceAccountConfig()
+            var containerSa = new IamServiceAccount(this, "container-sa", new IamServiceAccountConfig()
             {
                 Name = "container-sa",
             });
@@ -45,12 +46,12 @@ namespace MyTerraformStack
             new ResourcemanagerFolderIamMember(this, "containerImagePuller", new ResourcemanagerFolderIamMemberConfig
             {
                 FolderId = folderId.StringValue,
-                Member = $"serviceAccount:{containerSA.Id}",
+                Member = $"serviceAccount:{containerSa.Id}",
                 Role = "container-registry.images.puller",
                 SleepAfter = 10,
                 DependsOn = new ITerraformDependable[]
                 {
-                    containerSA
+                    containerSa
                 },
             });
 
@@ -105,13 +106,47 @@ namespace MyTerraformStack
                 },
                 Memory = 256,
                 Name = "serverless-dotnet",
-                ServiceAccountId = containerSA.Id,
+                ServiceAccountId = containerSa.Id,
                 DependsOn = new[] {image}
             });
 
             new TerraformOutput(this, "container-url", new TerraformOutputConfig()
             {
                 Value = container.Url,
+            });
+
+            var invokeSa = new IamServiceAccount(this, "container-invoke-sa", new IamServiceAccountConfig()
+            {
+                Name = "container-invoke-sa",
+            });
+
+            new ResourcemanagerFolderIamMember(this, "container-invoke-role", new ResourcemanagerFolderIamMemberConfig
+            {
+                FolderId = folderId.StringValue,
+                Member = $"serviceAccount:{invokeSa.Id}",
+                Role = "serverless-containers.containerInvoker",
+                SleepAfter = 10,
+                DependsOn = new ITerraformDependable[]
+                {
+                    invokeSa
+                },
+            });
+
+            var apigw = new ApiGateway(this, "apigw", new ApiGatewayConfig()
+            {
+                Name = "dotnet-apigw",
+                Spec = Fn.Templatefile(sourceCodeAsset.Path + "/swagger.yaml",
+                    new Dictionary<string, string>()
+                    {
+                        ["container_id"] = container.Id,
+                        ["container_service_account_id"] = invokeSa.Id,
+                    }
+                ),
+            });
+
+            new TerraformOutput(this, "apigw-url", new TerraformOutputConfig()
+            {
+                Value = apigw.Domain,
             });
         }
     }
