@@ -1,10 +1,13 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using NLog.Extensions.Logging;
 using ServerlessContainerDemo.Auth;
 using ServerlessContainerDemo.OpenAPI.Filters;
 using NLog;
 using NLog.Web;
+using ServerlessContainerDemo.Middleware;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 
@@ -27,10 +30,16 @@ try
         c.OperationFilter<YcExtensionsFilter>();
     });
 
-    builder.Services.AddAuthentication("BasicAuthentication")
+    builder.Services.AddAuthentication()
         .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>
             ("BasicAuthentication", null);
-    builder.Services.AddAuthorization();
+    builder.Services.AddAuthorization(options =>
+    {
+        var basicAuthenticationSchemePolicyBuilder = new AuthorizationPolicyBuilder("BasicAuthentication");
+        options.AddPolicy("BasicAuthentication", basicAuthenticationSchemePolicyBuilder
+            .RequireClaim(ClaimTypes.Role, "Admin")
+            .Build());
+    });
 
 
     var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
@@ -38,6 +47,8 @@ try
         serverOptions => { serverOptions.ListenAnyIP(int.Parse(port)); });
 
     var app = builder.Build();
+
+    app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())

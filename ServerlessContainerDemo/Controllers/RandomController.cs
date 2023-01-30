@@ -14,13 +14,12 @@ public class RandomController : ControllerBase
         _logger = logger;
     }
 
-    [Authorize]
     [HttpGet(Name = "GetRandom")]
     public long Get()
     {
         var value = new Random().NextInt64();
         var reminder = new Random().Next() % 10;
-        using (_logger.BeginScope("Value {value}", value, reminder))
+        using (_logger.BeginScope("Value {value} {reminder}", value, reminder))
         {
             if (value % 10 == reminder)
             {

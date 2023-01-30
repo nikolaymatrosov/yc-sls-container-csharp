@@ -30,7 +30,7 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
             var credentialString = Encoding.UTF8.GetString(Convert.FromBase64String(token));
             var credentials = credentialString.Split(':');
             var user = credentials[0];
-            var pass = credentials[0];
+            var pass = credentials[1];
             if (user == "admin" && pass == "admin")
             {
                 var claims = new[] {new Claim("name", credentials[0]), new Claim(ClaimTypes.Role, "Admin")};
