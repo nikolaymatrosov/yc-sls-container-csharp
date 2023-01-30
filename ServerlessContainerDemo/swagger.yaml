@@ -3,6 +3,31 @@ info:
   title: Serverless Container Demo
   version: v1
 paths:
+  /Random:
+    get:
+      tags:
+        - Random
+      operationId: GetRandom
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int64
+            application/json:
+              schema:
+                type: integer
+                format: int64
+            text/json:
+              schema:
+                type: integer
+                format: int64
+      x-yc-apigateway-integration:
+        type: serverless_containers
+        container_id: '${container_id}'
+        service_account_id: '${container_service_account_id}'
   /WeatherForecast:
     get:
       tags:

@@ -1,3 +1,5 @@
+using NLog;
+
 namespace ServerlessContainerDemo.Auth;
 
 using System.Security.Claims;
@@ -19,18 +21,22 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        Logger log = LogManager.GetCurrentClassLogger();
         var authHeader = Request.Headers["Authorization"].ToString();
         if (authHeader != null && authHeader.StartsWith("basic", StringComparison.OrdinalIgnoreCase))
         {
             var token = authHeader.Substring("Basic ".Length).Trim();
-            System.Console.WriteLine(token);
+            log.Debug("Found Auth”orization Header", new {type = "basic"});
             var credentialString = Encoding.UTF8.GetString(Convert.FromBase64String(token));
             var credentials = credentialString.Split(':');
-            if (credentials[0] == "admin" && credentials[1] == "admin")
+            var user = credentials[0];
+            var pass = credentials[0];
+            if (user == "admin" && pass == "admin")
             {
                 var claims = new[] {new Claim("name", credentials[0]), new Claim(ClaimTypes.Role, "Admin")};
                 var identity = new ClaimsIdentity(claims, "Basic");
                 var claimsPrincipal = new ClaimsPrincipal(identity);
+                log.Info("Authorized user {user}", user);
                 return Task.FromResult(
                     AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name)));
             }
