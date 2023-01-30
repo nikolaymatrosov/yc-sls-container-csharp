@@ -18,15 +18,15 @@
     <IncludeSource>true</IncludeSource>
     <Nullable>enable</Nullable>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="null-0.0.0.tgz" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Amazon.JSII.Runtime" Version="[1.71.0,2.0.0)" />
-    <PackageReference Include="HashiCorp.Cdktf" Version="[0.14.1]" />
-    <PackageReference Include="Constructs" Version="[10.1.162]" />
+    <PackageReference Include="Amazon.JSII.Runtime" Version="[1.74.0,2.0.0)" />
+    <PackageReference Include="HashiCorp.Cdktf" Version="[0.15.2]" />
+    <PackageReference Include="Constructs" Version="[10.1.235]" />
   </ItemGroup>
   <PropertyGroup>
     <!-- Silence [Obsolete] warnings -->

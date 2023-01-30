@@ -36,13 +36,13 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
             }
 
             Response.StatusCode = 403;
-            Response.Headers.Add("WWW-Authenticate", "Basic realm=\"localhost:8080\"");
+            Response.Headers.Add("WWW-Authenticate", "Basic");
             return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Header"));
         }
         else
         {
             Response.StatusCode = 401;
-            Response.Headers.Add("WWW-Authenticate", "Basic realm=\"localhost:8080\"");
+            Response.Headers.Add("WWW-Authenticate", "Basic");
             return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Header"));
         }
     }

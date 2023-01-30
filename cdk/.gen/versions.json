@@ -1,6 +1,5 @@
 {
   "registry.terraform.io/yandex-cloud/yandex": "0.84.0",
   "registry.terraform.io/hashicorp/null": "3.2.1",
-  "registry.terraform.io/hashicorp/external": "2.2.3",
-  "registry.terraform.io/hashicorp/template": "2.2.0"
+  "registry.terraform.io/hashicorp/external": "2.2.3"
 }
