@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.0.1
 info:
   title: Serverless Container Demo
   version: v1
@@ -50,4 +50,3 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      
