@@ -41,7 +41,7 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
                     AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name)));
             }
 
-            Response.StatusCode = 403;
+            Response.StatusCode = 401;
             Response.Headers.Add("WWW-Authenticate", "Basic");
             return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Header"));
         }
